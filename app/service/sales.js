@@ -22,8 +22,8 @@ class SalesService extends Service {
     } = this.app.Sequelize;
 
     let offset = toInt(param.pageNum) * toInt(param.pageSize) - toInt(param.pageSize);
-    let startTime = new Date(param.payTime + '-01');
-    let endTime = new Date(param.payTime + '-31');
+    let startTime = new Date(param.payTime + '-01 00:00:00');
+    let endTime = new Date(param.payTime + '-31 23:59:59');
     // let sale_person = param.salePerson;
 
     const query = {
@@ -282,24 +282,54 @@ class SalesService extends Service {
     //数据库查询
     const result = await ctx.model.Product.findAll(query);
 
-    let product_list = [];
-    result.map(ele => { // 找出父级
-      if (ele.parentId == 0) {
-        let item = {
-          id: ele.id,
-          parentId: ele.parentId,
-          categoryName: ele.categoryName,
-          sort: ele.sort,
-          createdAt: ele.createdAt,
-          updatedAt: ele.updatedAt,
-          children: []
-        }
-        product_list.push(item);
+    let product_list = result.filter(ele => ele.parentId == 0).map(x => {
+      let item = {
+        id: x.id,
+        parentId: x.parentId,
+        categoryName: x.categoryName,
+        sort: x.sort,
+        createdAt: x.createdAt,
+        updatedAt: x.updatedAt,
+        children: []
       }
+      item.children = result.filter(y => y.parentId == x.id);
+      if(item.children.length > 0){
+        item.children = item.children.map(z => {
+          let z_item = {
+            id: z.id,
+            parentId: z.parentId,
+            categoryName: z.categoryName,
+            sort: z.sort,
+            createdAt: z.createdAt,
+            updatedAt: z.updatedAt,
+            children: []
+          }
+          z_item.children = result.filter(w => w.parentId == z.id);
+          if(z_item.children.length > 0){
+            z_item.children = z_item.children.map(a => {
+              let a_item = {
+                id: a.id,
+                parentId: a.parentId,
+                categoryName: a.categoryName,
+                sort: a.sort,
+                createdAt: a.createdAt,
+                updatedAt: a.updatedAt,
+                children: []
+              }
+              a_item.children = result.filter(w => w.parentId == a.id);
+              return a_item;
+            })
+          }
+          return z_item;
+        });
+      }
+      return item;
     });
-    product_list.forEach(x => {
-      x.children = result.filter(y => y.parentId == x.id);
-    })
+
+    // 遍历找出关联
+
+
+
 
     //返回数据
     return {
