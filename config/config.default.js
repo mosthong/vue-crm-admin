@@ -34,7 +34,7 @@ module.exports = appInfo => {
     },
     //保存时用的时间
     timezone: '+08:00' ,// 保存为本地时区
-  //读取时用的时间
+    //读取时用的时间
     dialectOptions: {
       dateStrings: true,
       typeCast(field, next) {

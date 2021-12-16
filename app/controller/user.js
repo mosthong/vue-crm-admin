@@ -3,19 +3,24 @@
 const Controller = require('egg').Controller;
 
 class UsersController extends Controller {
-  
+  // 登录
   async login() {
     const ctx = this.ctx;
     const data = ctx.request.body;
-    const userInfo = await ctx.service.user.find(data);
+    // 获取用户信息
+    const userInfo = await ctx.model.User.findOne({ 
+      where: {
+        username: data.username, 
+      }
+    });
     // const aesEncrypt = await ctx.service.user.aesEncrypt('123456', 'key123'); //加密
 
     let result;
-    if(userInfo.data){
-      const aesDecrypt = await ctx.service.user.aesDecrypt(userInfo.data.password, 'key123');
+    if(userInfo){
+      const aesDecrypt = await ctx.service.user.aesDecrypt(userInfo.password, 'key123');
       // console.log('查询用户信息', userInfo);
       //用户名密码生成token
-      const creat_token = await ctx.service.user.aesEncrypt(userInfo.data.username + ',' + userInfo.data.password, 'key123');
+      const creat_token = await ctx.service.user.aesEncrypt(userInfo.username + ',' + userInfo.password, 'key123');
 
       if(aesDecrypt === data.password){
         result = {
@@ -45,6 +50,7 @@ class UsersController extends Controller {
     
   }
 
+  // 用户信息
   async info() {
     const ctx = this.ctx;
 
@@ -73,6 +79,39 @@ class UsersController extends Controller {
 
     ctx.body = result;
     
+  }
+
+  // 用户列表
+	async list() {
+		const ctx = this.ctx;
+		const query = ctx.query;
+		const result = await ctx.service.user.list(query);
+
+		ctx.body = result
+	}
+
+  // 创建用户
+  async creat() {
+    const ctx = this.ctx;
+    const data = ctx.request.body; 
+    const result = await ctx.service.user.creat(data);
+    ctx.body = result
+  }
+
+  // 修改用户
+  async update() {
+    const ctx = this.ctx;
+    const data = ctx.request.body; 
+    const result = await ctx.service.user.update(data);
+    ctx.body = result
+  }
+
+  // 删除用户
+  async delete() {
+    const ctx = this.ctx;
+    const id = ctx.params.id; 
+    const result = await ctx.service.user.delete(id);
+    ctx.body = result
   }
 }
 

@@ -1,5 +1,7 @@
 exports.mysql = {
-    // 单数据库信息配置
+    /**
+     * 单数据库信息配置 mysql默认设置 如果sequelize单独设置并使用sequelize语法，则此处失效
+     */
     client: {
       // host
       host: '127.0.0.1',

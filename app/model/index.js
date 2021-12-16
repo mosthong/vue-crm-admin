@@ -60,7 +60,7 @@ module.exports = app => {
 
   // 建立关联表
   Sales.associate = function() {
-    app.model.Sales.belongsTo(app.model.User, {  as: 'userInfo', foreignKey: 'salePerson', targetKey: 'username'});
+    Sales.belongsTo(app.model.User, { foreignKey: 'salePerson', targetKey: 'username', as: 'userInfo'});
   };
 
   return Sales;

@@ -4,15 +4,25 @@ module.exports = app => {
   const { STRING, INTEGER, DATE, DATETIME, NOW } = app.Sequelize;
 
   const User = app.model.define(
-    'jp_admin_users', 
+    'jp_system_users', 
     {
       id: { type: INTEGER, primaryKey: true, autoIncrement: true },
-      username: STRING(30),
+      roles: STRING(30),
+      registerIp: STRING(100),
+      username: {
+        type: STRING(30),
+      },
       password: STRING(200),
-      roles: STRING(20),
-      role_name: STRING(30)
+      status: INTEGER
     }
   );
+  
+  /**
+   * 建立表关联
+   */
+  User.associate = function() {
+    app.model.User.belongsTo(app.model.Roles, { as: 'systemRoles', foreignKey: 'roles', targetKey: 'roleId'});
+  };
 
   return User;
 };

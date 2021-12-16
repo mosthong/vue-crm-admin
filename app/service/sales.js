@@ -24,7 +24,13 @@ class SalesService extends Service {
     let offset = toInt(param.pageNum) * toInt(param.pageSize) - toInt(param.pageSize);
     let startTime = new Date(param.payTime + '-01 00:00:00');
     let endTime = new Date(param.payTime + '-31 23:59:59');
-    // let sale_person = param.salePerson;
+
+    let User = this.ctx.model.User;
+
+    // 从token中解析出username作为参数查询销售的数据
+    const token = ctx.headers.token;
+    const aesDecrypt = await ctx.service.user.aesDecrypt(token, 'key123');
+    const sale_person =  aesDecrypt ? aesDecrypt.split(',')[0] : '';
 
     const query = {
       limit: toInt(param.pageSize),
@@ -33,16 +39,15 @@ class SalesService extends Service {
         pay_time: {
           [Op.between]: [startTime, endTime],
         },
-        sale_person: {
-          [Op.like]: '%' + param.salePerson + '%'
-        },
+        sale_person: sale_person,
         is_invoice: {
           [Op.like]: '%' + param.isInvoice + '%'
         },
       },
       order: [
-        ['updated_at', 'ASC'],
-      ]
+        ['created_at', 'DESC'],
+      ],
+      include: [{ model: User, as: 'userInfo', attributes: ['username'] }]
     };
 
     const result = await ctx.model.Sales.findAndCountAll(query);
@@ -58,12 +63,14 @@ class SalesService extends Service {
     const ctx = this.ctx;
 
     const param = {
+      productId: data.productId,
       productName: data.productName,
       customerName: data.customerName,
       customerCode: data.customerCode,
       transactionPrice: data.transactionPrice,
       transactionPriceForeign: data.transactionPriceForeign,
       salePerson: data.salePerson,
+      salePersonId: data.salePersonId,
       saleDepartment: data.saleDepartment,
       isInvoice: data.isInvoice,
       payMethods: data.payMethods,
@@ -97,12 +104,14 @@ class SalesService extends Service {
     const ctx = this.ctx;
 
     const param = {
+      productId: data.productId,
       productName: data.productName,
       customerName: data.customerName,
       customerCode: data.customerCode,
       transactionPrice: data.transactionPrice,
       transactionPriceForeign: data.transactionPriceForeign,
       salePerson: data.salePerson,
+      salePersonId: data.salePersonId,
       saleDepartment: data.saleDepartment,
       isInvoice: data.isInvoice,
       payMethods: data.payMethods,
@@ -144,7 +153,7 @@ class SalesService extends Service {
     });
     return {
       code: 200,
-      message: '创建成功',
+      message: '删除成功',
       data: result,
     };
   }
@@ -293,7 +302,7 @@ class SalesService extends Service {
         children: []
       }
       item.children = result.filter(y => y.parentId == x.id);
-      if(item.children.length > 0){
+      if(item.children.length > 0){ // 有二级产品
         item.children = item.children.map(z => {
           let z_item = {
             id: z.id,
@@ -317,11 +326,18 @@ class SalesService extends Service {
                 children: []
               }
               a_item.children = result.filter(w => w.parentId == a.id);
+              if(a_item.children.length == 0){
+                a_item = a;
+              }
               return a_item;
             })
+          }else{
+            z_item = z;
           }
           return z_item;
         });
+      }else{
+        item = x;
       }
       return item;
     });
