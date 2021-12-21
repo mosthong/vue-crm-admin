@@ -13,7 +13,7 @@ class SalesService extends Service {
   /**
    * 订单管理
    * **************************************************************
-   */
+  */
   // 查询 - 销售列表
   async find(param) {
     const ctx = this.ctx;
@@ -22,39 +22,73 @@ class SalesService extends Service {
     } = this.app.Sequelize;
 
     let offset = toInt(param.pageNum) * toInt(param.pageSize) - toInt(param.pageSize);
-    let startTime = new Date(param.payTime + '-01 00:00:00');
-    let endTime = new Date(param.payTime + '-31 23:59:59');
 
-    let User = this.ctx.model.User;
-
+    let User = ctx.model.User;
     // 从token中解析出username作为参数查询销售的数据
     const token = ctx.headers.token;
     const aesDecrypt = await ctx.service.user.aesDecrypt(token, 'key123');
-    const sale_person =  aesDecrypt ? aesDecrypt.split(',')[0] : '';
+    // 获取用户信息 - 查询权限
+    const userInfo = await ctx.service.user.find({
+      username: aesDecrypt.split(',')[0],
+      password: aesDecrypt.split(',')[1]
+    });
+    
+    // 找出权限内的成员
+    let teamsData = [{
+      sale_person: aesDecrypt.split(',')[0]
+    }];
 
-    const query = {
+    if (param.salePerson) { // 如果传入销售员，精确查找
+      teamsData = [{
+        sale_person: param.salePerson
+      }];
+    }
+    else if (userInfo.data.roles.indexOf('_leader') != -1) { // 主管查询团队所有成员
+      // 截取lender之前的部分
+      let roles = userInfo.data.roles.substring(0, userInfo.data.roles.indexOf('_leader'));
+      const teams = await ctx.service.user.getMyTeam(roles);
+      teamsData = teams.map(x => {
+        return {
+          salePerson: x.username
+        };
+      });
+    }
+
+    // 查询自己
+    let query = {
       limit: toInt(param.pageSize),
       offset: offset,
       where: {
-        pay_time: {
-          [Op.between]: [startTime, endTime],
+        [Op.or]: teamsData, // 团队成员
+        createdAt: { // 时间段
+          [Op.between]: [param.startTime, param.endTime]
         },
-        sale_person: sale_person,
-        is_invoice: {
+        isInvoice: { // 开票
           [Op.like]: '%' + param.isInvoice + '%'
+        },
+        productName: { // 产品
+          [Op.like]: '%' + param.productName + '%'
+        },
+        saleDepartment: { // 部门
+          [Op.like]: '%' + param.saleDepartment + '%'
+        },
+        payContactInfo: { // 联系方式
+          [Op.like]: '%' + param.payContactInfo + '%'
         },
       },
       order: [
         ['created_at', 'DESC'],
       ],
-      include: [{ model: User, as: 'userInfo', attributes: ['username'] }]
+      include: [{ model: User, as: 'userInfo', attributes: ['username', 'roles'] }]
     };
 
     const result = await ctx.model.Sales.findAndCountAll(query);
+    
     return {
       code: 200,
       message: '查询成功',
-      current: 1,
+      pageNum: param.pageNum,
+      pageSize: param.pageSize,
       data: result,
     };
   }
@@ -69,6 +103,7 @@ class SalesService extends Service {
       customerCode: data.customerCode,
       transactionPrice: data.transactionPrice,
       transactionPriceForeign: data.transactionPriceForeign,
+      transactionCount: data.transactionCount,
       salePerson: data.salePerson,
       salePersonId: data.salePersonId,
       saleDepartment: data.saleDepartment,
@@ -110,6 +145,7 @@ class SalesService extends Service {
       customerCode: data.customerCode,
       transactionPrice: data.transactionPrice,
       transactionPriceForeign: data.transactionPriceForeign,
+      transactionCount: data.transactionCount,
       salePerson: data.salePerson,
       salePersonId: data.salePersonId,
       saleDepartment: data.saleDepartment,
@@ -157,6 +193,7 @@ class SalesService extends Service {
       data: result,
     };
   }
+
 
   /**
    * 国家地区管理

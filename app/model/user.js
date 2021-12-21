@@ -22,6 +22,8 @@ module.exports = app => {
    */
   User.associate = function() {
     app.model.User.belongsTo(app.model.Roles, { as: 'systemRoles', foreignKey: 'roles', targetKey: 'roleId'});
+    app.model.User.hasMany(app.model.Sales, { as: 'saleList', foreignKey: 'salePerson', sourceKey: 'username'});
+    app.model.Sales.belongsTo(app.model.User, { as: 'userInfo', targetKey: 'username', foreignKey: 'salePerson'});
   };
 
   return User;

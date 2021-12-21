@@ -60,7 +60,7 @@ class PermissionService extends Service {
             children: []
           }
           z_item.children = result.filter(w => w.parentId == z.id);
-          if(z_item.children.length > 0){
+          if(z_item.children.length > 0){ // 三级
             z_item.children = z_item.children.map(a => {
               let a_item = {
                 id: a.id,

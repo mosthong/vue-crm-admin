@@ -26,6 +26,11 @@ module.exports = appInfo => {
     database: 'jp_crm',
     username: 'root',
     password: '111111',
+    // host: '129.204.122.42',
+    // port: 3306,
+    // database: 'jp_crm',
+    // username: 'jp_crm',
+    // password: 'cTk8MFxHGT57ScnF',
     define: {
       raw: true,
       underscored: true,

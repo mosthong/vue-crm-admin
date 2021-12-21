@@ -33,6 +33,7 @@ module.exports = app => {
       },
       transactionPrice: INTEGER,
       transactionPriceForeign: INTEGER,
+      transactionCount: INTEGER,
       salePerson: {
         type: STRING(30),
         allowNull: false,
@@ -57,11 +58,6 @@ module.exports = app => {
       remark: STRING(200),
     }
   );
-
-  // 建立关联表
-  Sales.associate = function() {
-    app.model.Sales.belongsTo(app.model.User, {  as: 'userInfo', foreignKey: 'salePerson', targetKey: 'username'});
-  };
 
   return Sales;
 };

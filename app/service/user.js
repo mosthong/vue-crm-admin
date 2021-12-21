@@ -61,37 +61,47 @@ class UserService extends Service {
    */
   async list(param) {
     const ctx = this.ctx;
-    const {
-      Op
-    } = this.app.Sequelize;
+    // const { Op } = this.app.Sequelize;
+
+    let dbUser = ctx.model.User;
+    let dbRoles = ctx.model.Roles;
 
     let offset = toInt(param.pageNum) * toInt(param.pageSize) - toInt(param.pageSize);
-
     const query = {
+      include: [{ model: dbRoles, as: 'systemRoles', attributes: ['roleName', 'permission', 'comment'] }],
       limit: toInt(param.pageSize),
       offset: offset,
       order: [
-        ['created_at', 'ASC'],
+        ['created_at', 'DESC'],
       ],
       attributes:  { exclude: ['password'] }
     };
 
-    const result = await ctx.model.User.findAndCountAll(query);
+    const result = await dbUser.findAndCountAll(query);
     let new_arr = result.rows.map(x => {
       let item = {
         "id": x.id,
-				"roles": x.roles,
-				"roles_arr": [],
 				"registerIp": x.registerIp,
 				"username": x.username,
 				"status": x.status,
 				"createdAt": x.createdAt,
 				"updatedAt": x.updatedAt,
+				"roles": x.roles,
+				"rolesArr": [],
+        "roleDetail": x.systemRoles
       };
-      if(x.roles === 'admin'){
-        item.roles_arr = ['admin']
-      }else{
-        item.roles_arr = [...['admin'], x.roles.split('_')[0], x.roles]
+      // 组合权限 便于前端展示
+      if (x.roles === 'admin') { // 超级管理员
+        item.rolesArr = ['admin']
+      }
+      else if (x.roles.split('_').length === 1) { // 二级权限
+        item.rolesArr = [...['admin'], x.roles]
+      }
+      else if (x.roles.split('_').length === 2) { // 三级权限
+        item.rolesArr = [...['admin'], x.roles.split('_')[0], x.roles]
+      }
+      else { // 四级权限
+        item.rolesArr = [...['admin'], x.roles.split('_')[0], x.roles.split('_')[0] + '_' + x.roles.split('_')[1], x.roles]
       }
       return item;
     });
@@ -105,6 +115,45 @@ class UserService extends Service {
         rows: new_arr
       }
     };
+  }
+
+  /**
+   * 查询全部用户列表
+   */
+  async getAllUser(param) {
+    const ctx = this.ctx;
+
+    let dbUser = ctx.model.User;
+
+    const query = {
+      attributes:  { exclude: ['password'] }
+    };
+
+    const result = await dbUser.findAll(query);
+    return result;
+  }
+
+  /**
+   * 查询我的下属列表
+   */
+  async getMyTeam(val) {
+    const ctx = this.ctx;
+    const { Op } = this.app.Sequelize;
+
+    let dbUser = ctx.model.User;
+
+    const query = {
+      where: {
+        roles: {
+          [Op.like]: '%' + val + '%'
+        }
+      },
+      attributes:  { exclude: ['password'] },
+      include: [{ model: ctx.model.Roles, as: 'systemRoles' }]
+    };
+
+    const result = await dbUser.findAll(query);
+    return result;
   }
 
   // 创建用户

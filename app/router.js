@@ -8,6 +8,7 @@ module.exports = app => {
     router,
     controller
   } = app;
+
   router.get('/', controller.sales.index); // 首页
 
   /**
@@ -43,6 +44,14 @@ module.exports = app => {
   router.post('/back/sales/update', controller.sales.update);
   // 删除 - 销售记录
   router.post('/back/sales/delete', controller.sales.delete);
+
+  /**
+   * 销售数据统计
+   * ********************************************************************
+   **/
+  // 按照部门统计销售情况
+  router.get('/back/statistics/sales/department', controller.statistics.salesDepartment);
+
 
   /**
    * 国家地区管理
