@@ -1,6 +1,6 @@
-# example demo.
+# 简单得CRM系统
 
-sss
+>> 基于egg
 
 ## QuickStart
 
