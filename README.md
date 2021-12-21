@@ -1,6 +1,6 @@
 # 简单得CRM系统
 
->> 基于egg
+> 基于egg
 
 ## QuickStart
 
