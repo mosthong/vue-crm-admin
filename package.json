@@ -264,6 +264,7 @@
     "egg-security": "^2.9.0",
     "egg-sequelize": "^6.0.0",
     "egg-session": "^3.3.0",
+    "egg-socket.io": "^4.1.6",
     "egg-static": "^2.2.0",
     "egg-ts-helper": "^1.29.1",
     "egg-utils": "^2.4.1",
@@ -788,7 +789,7 @@
   },
   "scripts": {
     "test": "mocha",
-    "dev": "egg-bin dev"
+    "dev": "egg-bin dev --sticky"
   },
   "author": "",
   "license": "ISC"

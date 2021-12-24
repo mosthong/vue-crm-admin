@@ -62,9 +62,36 @@ module.exports = appInfo => {
     allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH'
   };
 
+  // 国际化
+  config.i18n = {
+    defaultLocale: 'zh-CN',
+  };
+
   // add your user config here
   const userConfig = {
     // myAppName: 'egg',
+  };
+
+  config.io = {
+    init: {
+      wsEngine: 'ws',
+    }, 
+    // passed to engine.io
+    namespace: {
+      '/': {
+        connectionMiddleware: ['auth'],
+        packetMiddleware: [],
+      },
+      '/example': {
+        connectionMiddleware: [],
+        packetMiddleware: [],
+      },
+    },
+
+    // redis: {
+    //   host: '127.0.0.1',
+    //   port: 6379,
+    // },
   };
 
   return {

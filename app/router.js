@@ -49,8 +49,12 @@ module.exports = app => {
    * 销售数据统计
    * ********************************************************************
    **/
-  // 按照部门统计销售情况
+  // 按照销售员统计销售情况
   router.get('/back/statistics/sales/department', controller.statistics.salesDepartment);
+  // 按照产品统计销售情况
+  router.get('/back/statistics/sales/products', controller.statistics.salesForProducts);
+  // 上周、本月、本季、本年 订单数量统计
+  router.get('/back/statistics/sales/date', controller.statistics.salesForTimeSlot);
 
 
   /**
