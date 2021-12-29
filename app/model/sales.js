@@ -8,14 +8,14 @@ module.exports = app => {
     {
       id: { type: INTEGER, primaryKey: true, autoIncrement: true },
       productName: {
-        type: STRING(200),
+        type: STRING(500),
         allowNull: false,
         validate: {
           notEmpty: true,
         }
       },
       productId: {
-        type: INTEGER,
+        type: STRING(500),
         allowNull: false,
         validate: {
           notEmpty: true,
