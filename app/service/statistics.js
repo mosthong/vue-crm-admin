@@ -407,7 +407,7 @@ class StatisticsService extends Service {
     let currentMonth = timeSlotChange('本月')
     currentMonthQuery.where = {
       createdAt: { // 时间段
-        [Op.between]: [currentQuarter.startTime, currentQuarter.endTime]
+        [Op.between]: [currentMonth.startTime, currentMonth.endTime]
       }
     };
 
