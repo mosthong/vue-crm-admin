@@ -66,6 +66,9 @@ class SalesService extends Service {
         isInvoice: { // 开票
           [Op.like]: '%' + param.isInvoice + '%'
         },
+        customerName: { // 客户名称
+          [Op.like]: '%' + param.customerName + '%'
+        },
         productName: { // 产品
           [Op.like]: '%' + param.productName + '%'
         },

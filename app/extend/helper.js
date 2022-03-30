@@ -1,17 +1,9 @@
 'use strict';
 
-module.exports = {
-  parseMsg(action, payload = {}, metadata = {}) {
-    const meta = Object.assign({}, {
-      timestamp: Date.now(),
-    }, metadata);
+const moment = require('moment');
 
-    return {
-      meta,
-      data: {
-        action,
-        payload,
-      },
-    };
-  },
-};
+module.exports = {
+  formatTime(time) {
+    return moment(time).format('YYYY-MM-DD HH:mm::ss.SSS');
+  }
+}

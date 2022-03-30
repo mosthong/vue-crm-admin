@@ -18,16 +18,16 @@ module.exports = appInfo => {
   // add your middleware config here
   config.middleware = [];
 
-  // 数据库ORM 框架
+  // 数据库ORM 框架: sequelize
   config.sequelize = {
     dialect: 'mysql',
-    // 本地
+    // 本地  ************************
     host: 'localhost',
     port: 3306,
     database: 'jp_crm',
     username: 'root',
     password: '111111',
-    // 生产
+    // 生产 ************************
     // host: '129.204.122.42',
     // port: 3306,
     // database: 'jp_crm',

@@ -3,19 +3,6 @@
 const Controller = require('egg').Controller;
 
 class SalesController extends Controller {
-	// 首页 socket测试
-	async index() {
-		const { ctx } = this;
-
-    const message = 'ctx.args[0]';
-    await ctx.socket.emit('res', `Hi! I've got your message: ${message}`);
-
-		ctx.body = {
-      title: 'Eugene 客户管理系统',
-      data: message
-    };
-	}
-
   /**
    * 订单管理
    * **************************************************************

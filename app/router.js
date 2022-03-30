@@ -9,7 +9,7 @@ module.exports = app => {
     controller
   } = app;
 
-  router.get('/', controller.sales.index); // 首页
+  router.get('/', controller.index.index); // 首页
 
   /**
    * 授权登录
@@ -90,6 +90,5 @@ module.exports = app => {
   // 查询
   router.get('/back/permission/roles/list', controller.roles.list);
   // 添加
-
 
 };
