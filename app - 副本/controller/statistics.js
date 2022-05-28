@@ -42,16 +42,6 @@ class SalesController extends Controller {
 		ctx.body = result
 	}
 
-	// 通过数据库运算
-	async getAll() {
-		const ctx = this.ctx;
-		const query = ctx.query;
-		const result = await ctx.service.statistics.getAll(query);
-		
-		ctx.body = result
-	}
-
-
 
 }
 

@@ -470,48 +470,6 @@ class StatisticsService extends Service {
       }
     };
   }
-
-  /**
-   * V2
-   */
-  // 总和
-  async getAll(params) {
-    const ctx = this.ctx;
-    const {
-      Op
-    } = this.app.Sequelize;
-
-    const token = ctx.request.header.token
-    const aesDecrypt = await ctx.service.user.aesDecrypt(token, 'key123');
-    const user = await ctx.service.user.find({
-      username: aesDecrypt.split(',')[0],
-      password: aesDecrypt.split(',')[1]
-    });
-    const roleId = user.data.roles.replace('_leader', '')
-
-    // 查询用户
-    let data = await ctx.model.User.findAll({
-      where: {
-        roles: {
-          [Op.like]: '%' + roleId + '%'
-        },
-        // '$saleList.created_at$': { [Op.between]: [params.startTime, params.endTime] }
-      },
-      attributes: ['username'],
-      // include: [{ model: ctx.model.Sales, as: 'saleList' }]
-    });
-
-    data.forEach(ele => {
-      ele.saleList = []
-    });
-
-    return {
-      code: 200,
-      data,
-      message: '查询成功'
-    };
-
-  }
 }
 
 module.exports = StatisticsService;

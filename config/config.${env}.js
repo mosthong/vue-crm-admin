@@ -4,13 +4,13 @@ exports.mysql = {
    */
   client: {
     // host
-    host: '127.0.0.1',
+    host: '129.204.122.42',
     // 端口号
     port: '3306',
     // 用户名
-    user: 'root',
+    user: 'jp_crm',
     // 密码
-    password: '111111',
+    password: 'cTk8MFxHGT57ScnF',
     // 数据库名
     database: 'jp_crm',
   },

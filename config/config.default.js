@@ -22,17 +22,17 @@ module.exports = appInfo => {
   config.sequelize = {
     dialect: 'mysql',
     // 本地  ************************
-    host: 'localhost',
-    port: 3306,
-    database: 'jp_crm',
-    username: 'root',
-    password: '111111',
-    // 生产 ************************
-    // host: '129.204.122.42',
+    // host: 'localhost',
     // port: 3306,
     // database: 'jp_crm',
-    // username: 'jp_crm',
-    // password: 'cTk8MFxHGT57ScnF',
+    // username: 'root',
+    // password: '111111',
+    // 生产 ************************
+    host: '129.204.122.42',
+    port: 3306,
+    database: 'jp_crm',
+    username: 'jp_crm',
+    password: 'cTk8MFxHGT57ScnF',
     define: {
       raw: true,
       underscored: true,
@@ -77,28 +77,6 @@ module.exports = appInfo => {
   // add your user config here
   const userConfig = {
     // myAppName: 'egg',
-  };
-
-  config.io = {
-    init: {
-      wsEngine: 'ws',
-    }, 
-    // passed to engine.io
-    namespace: {
-      '/': {
-        connectionMiddleware: ['auth'],
-        packetMiddleware: [],
-      },
-      '/example': {
-        connectionMiddleware: [],
-        packetMiddleware: [],
-      },
-    },
-
-    // redis: {
-    //   host: '127.0.0.1',
-    //   port: 6379,
-    // },
   };
 
   return {

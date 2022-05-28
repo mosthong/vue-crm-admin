@@ -3,14 +3,6 @@
 const Controller = require('egg').Controller;
 
 class SalesController extends Controller {
-	// 首页
-	async index() {
-		const {
-			ctx
-		} = this;
-		ctx.body = 'Eugene 客户管理系统';
-	}
-
   /**
    * 订单管理
    * **************************************************************

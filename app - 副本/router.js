@@ -9,7 +9,7 @@ module.exports = app => {
     controller
   } = app;
 
-  router.get('/', controller.sales.index); // 首页
+  router.get('/', controller.index.index); // 首页
 
   /**
    * 授权登录
@@ -55,9 +55,6 @@ module.exports = app => {
   router.get('/back/statistics/sales/products', controller.statistics.salesForProducts);
   // 上周、本月、本季、本年 订单数量统计
   router.get('/back/statistics/sales/date', controller.statistics.salesForTimeSlot);
-  // 数据库运算
-  // 总和
-  router.get('/back/v2/statistics/sales/getAll', controller.statistics.getAll);
 
 
   /**
@@ -93,6 +90,5 @@ module.exports = app => {
   // 查询
   router.get('/back/permission/roles/list', controller.roles.list);
   // 添加
-
 
 };
