@@ -1,4 +1,4 @@
-'use strict';
+// 'use strict';
 
 const Service = require('egg').Service;
 
@@ -106,7 +106,6 @@ const getLastMonth = (value = null, separate = '-') => {
     endDateTime: endDateTime,
   };
 };
-
 // 本周/本月/本季度/本年 时间
 function timeSlotChange (val) {
   let now = new Date(); //当前日期
@@ -184,10 +183,6 @@ function timeSlotChange (val) {
     endTime: nowYear + '-' + eMonth + '-' +  eDay + ' ' + eHours + ':' + eMinute + ':' + eSecond
   };
 };
-
-
-
-
 
 class StatisticsService extends Service {
   /**
@@ -474,40 +469,158 @@ class StatisticsService extends Service {
   /**
    * V2
    */
-  // 总和
+  // 数据统计 - 全部
   async getAll(params) {
     const ctx = this.ctx;
     const {
       Op
     } = this.app.Sequelize;
 
+    // 解析token获取权限
     const token = ctx.request.header.token
     const aesDecrypt = await ctx.service.user.aesDecrypt(token, 'key123');
     const user = await ctx.service.user.find({
       username: aesDecrypt.split(',')[0],
       password: aesDecrypt.split(',')[1]
     });
-    const roleId = user.data.roles.replace('_leader', '')
+    const roleId = user.data.roles.replace('_leader', '') // 去掉leader负责人后缀
 
-    // 查询用户
-    let data = await ctx.model.User.findAll({
+    // 销售总额
+    const volumeValue = await ctx.model.Sales.sum('transactionPrice', { 
+      where: { 
+        createdAt: { 
+          [Op.between]: [params.startTime, params.endTime] 
+        } 
+      } 
+    });
+    // 总销量
+    const volumeCount = await ctx.model.Sales.sum('transactionCount', { 
+      where: { 
+        createdAt: { 
+          [Op.between]: [params.startTime, params.endTime] 
+        } 
+      } 
+    });
+    // 查询用户列表
+    const userData = await ctx.model.User.findAll({
       where: {
         roles: {
           [Op.like]: '%' + roleId + '%'
         },
-        // '$saleList.created_at$': { [Op.between]: [params.startTime, params.endTime] }
+        '$saleList.created_at$': { [Op.between]: [params.startTime, params.endTime] }
       },
       attributes: ['username'],
-      // include: [{ model: ctx.model.Sales, as: 'saleList' }]
+      include: [
+        { model: ctx.model.Sales, as: 'saleList' }
+      ]
     });
-
-    data.forEach(ele => {
-      ele.saleList = []
+    // 对公支付统计
+    const publicPayTotal = await ctx.model.Sales.count({ 
+      where: { 
+        payMethods: {
+          [Op.eq]: 1
+        },
+        createdAt: { 
+          [Op.between]: [params.startTime, params.endTime]
+        } 
+      }
     });
+    // 对私支付统计
+    const privatePayTotal = await ctx.model.Sales.count({ 
+      where: {
+        payMethods: {
+          [Op.eq]: 2
+        },
+        createdAt: { 
+          [Op.between]: [params.startTime, params.endTime]
+        } 
+      }
+    });
+    // 员工数据统计
+    let personnel = []
+    for(let index in userData) {
+      const userParams = { 
+        [Op.and]: [{ salePerson: userData[index].username }],
+        createdAt: { 
+          [Op.between]: [params.startTime, params.endTime]
+        } 
+      }
+      // 员工销量
+      const userCount = await ctx.model.Sales.sum('transactionCount', { 
+        where: userParams
+      });
+      // 员工销售额
+      const userSum = await ctx.model.Sales.sum('transactionPrice', { 
+        where: userParams
+      });
+      // 对公支付
+      const publicPay = await ctx.model.Sales.count({ 
+        where: { 
+          payMethods: {
+            [Op.eq]: 1
+          },
+          salePerson: {
+            [Op.eq]: userData[index].username
+          },
+          createdAt: { 
+            [Op.between]: [params.startTime, params.endTime]
+          } 
+        }
+      });
+      // 对私支付
+      const privatePay = await ctx.model.Sales.count({ 
+        where: {
+          payMethods: {
+            [Op.eq]: 2
+          },
+          salePerson: {
+            [Op.eq]: userData[index].username
+          },
+          createdAt: { 
+            [Op.between]: [params.startTime, params.endTime]
+          } 
+        }
+      });
+      personnel.push({
+        user: userData[index].username,
+        count: userCount,
+        sum: userSum,
+        unit: '¥',
+        unitText: '（人民币）元',
+        payMethod: {
+          public: publicPay,
+          private: privatePay
+        }
+      })
+    }
 
     return {
       code: 200,
-      data,
+      date: {
+        startTime: params.startTime,
+        endTime: params.endTime
+      },
+      data: {
+        salesVolume: {
+          label: '总销售额',
+          value: volumeValue,
+          unit: '¥',
+          unitText: '（人民币）元'
+        },
+        volumeCount: {
+          label: '总销量',
+          value: volumeCount,
+          unit: 'piece',
+          unitText: '件'
+        },
+        payMethods: {
+          label: '支付方式',
+          publicPayTotal,
+          privatePayTotal
+        },
+        personnel,
+        // user: userData
+      },
       message: '查询成功'
     };
 
